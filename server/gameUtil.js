@@ -137,29 +137,6 @@ const setInitialBlinds = () => {
 		else if (d+2 >= gameState.players.length && d+1 < gameState.players.length) {
 			gameState.players[0].bigBlind = true;
 		}
-
-		//if(d+1 < gameState.players.length && d+2 < gameState.players.length && gameState.players[d+1].view === false && gameState.players[d+2].view === false)
-		//else if (d+1 < gameState.players.length && d+2 >= gameState.players.length &&)
-		/*
-		if((d-1) >= 0 && (d-2) >= 0) {
-			gameState.players[d-1].smallBlind = true;
-			gameState.players[d-2].bigBlind = true;
-			console.log("setting " + gameState.players[d-1].name + " to smallBlind");
-			console.log("setting " + gameState.players[d-2].name + " to bigBlind");
-		}
-		else if((d-1) >= 0 && (d-2) < 0) {
-			gameState.players[d-1].smallBlind = true;
-			gameState.players[gameState.players.length-1].bigBlind = true;
-			console.log("setting " + gameState.players[d-1].name + " to smallBlind");
-			console.log("setting " + gameState.players[gameState.players.length-1].name + " to bigBlind");
-		}
-		else {
-			gameState.players[gameState.players.length-1].smallBlind = true;
-			gameState.players[gameState.players.length-2].bigBlind = true;
-			console.log("setting " + gameState.players[gameState.players.length-1].name + " to smallBlind");
-			console.log("setting " + gameState.players[gameState.players.length-2].name + " to bigBlind");
-		}
-		*/
 	}
 	gameState.players[d].active = true;
 	blindsToPot();
@@ -228,7 +205,6 @@ const moveBlinds = () => {
 };
 
 const check = (socketId) => {
-	console.log("IN HERE");
 	var i;
 	for (i = 0; i < gameState.players.length; i++) {
 		if (gameState.players[i].id === socketId) {
@@ -242,7 +218,6 @@ const check = (socketId) => {
 		}
 		var count = 1;
 		while((i + count) <= gameState.players.length) {
-				console.log("i = " + i + ", count = " + count);
 				if((i+count) === gameState.players.length) {
 					i = 0;
 					count = 0;
@@ -262,7 +237,6 @@ const check = (socketId) => {
 		}
 		var count = 1;
 		while((i + count) <= gameState.players.length) {
-				console.log("i = " + i + ", count = " + count);
 				if((i+count) === gameState.players.length) {
 					i = 0;
 					count = 0;
@@ -277,47 +251,6 @@ const check = (socketId) => {
 		}
 	}
 
-
-	/*
-	for (let i = 0; i < gameState.players.length; i++) {
-		if (gameState.players[i].id === socketId && gameState.players[i].view === false) {
-		//	if(gameState.players[i].view === false) {
-				gameState.players[i].action = true;
-		//	}
-		//	else {
-		//		gameState.players[i].action = false;
-		//	}
-
-
-			/*
-			if (i + 1 < gameState.players.length) {
-				if(gameState.players[i + 1].view === true) {
-					for (let j = 0; j < gameState.players.length; j++) {
-						gameState.players[j].active = false;
-					}
-					//gameState.players[i + 1].active = false;
-					//gameState.players[i].active = false;
-					gameState.players[0].active = true;
-				}
-				else if(gameState.players[i + 1].view === false){
-					for (let j = 0; j < gameState.players.length; j++) {
-						gameState.players[j].active = false;
-					}
-					gameState.players[i + 1].active = true;
-				//	gameState.players[i].active = false;
-				}
-			}
-			else {
-				for (let j = 0; j < gameState.players.length; j++) {
-					gameState.players[j].active = false;
-				}
-				gameState.players[0].active = true;
-			//	gameState.players[i].active = false;
-			}
-			*/
-	//	}
-
-	//}
 	for (let i = 0; i < gameState.players.length; i++) {
 		if(gameState.players[i].smallBlind === true) {
 				console.log("smallBlind is " + gameState.players[i].name);
@@ -484,10 +417,8 @@ const fold = (socketId) => {
 		}
 
 		if(num_active === 1) {
-			console.log("ONE PLAYER LEFT");
 			for(let i = 0; i < gameState.players.length; i++) {
 				if(gameState.players[i].view === false) {
-					console.log("winner is " + gameState.players[i].name);
 					const winner = gameState.players[i];
 					for(let j = 0; j < gameState.players.length; j++) {
 						gameState.players[j].view = false;

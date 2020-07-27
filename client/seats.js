@@ -26,14 +26,14 @@ const Seats = (props) => {
 		else {
 			active = ''
 		}
-
+		console.log("isAllIn: " + clientPlayer[0].isAllIn);
 		//seat client player
 		return (
 			<div>
 				<div key={clientPlayer[0].id} className={'seat-1' + active}>
 					<div className="player">
 						<div className="player-font">{clientPlayer[0].name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + clientPlayer[0].dealer}</span></div>
-						<div className="player-font">${clientPlayer[0].bankroll}</div>
+						<div className="player-font">${clientPlayer[0].bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + clientPlayer[0].isAllIn}</span></div>
 					</div>
 				</div>
 
@@ -49,7 +49,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + left}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -59,7 +59,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + left + '-active'}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -69,7 +69,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + left}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -84,7 +84,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + (9 - diff)}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -94,7 +94,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + (9 - diff) + '-active'}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -104,7 +104,7 @@ const Seats = (props) => {
 										<div key={player.name} className={'seat-' + (9 - diff)}>
 											<div className="player">
 												<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-												<div className="player-font">${player.bankroll}</div>
+												<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 											</div>
 										</div>
 									);
@@ -126,7 +126,7 @@ const Seats = (props) => {
 								<div key={player.name} className={'seat-' + i + '-active'}>
 									<div className="player">
 										<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-										<div className="player-font">${player.bankroll}</div>
+										<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 									</div>
 								</div>
 							);
@@ -136,7 +136,7 @@ const Seats = (props) => {
 								<div key={player.name} className={'seat-' + i}>
 									<div className="player">
 										<div className="player-font"> {player.name}<span style={{fontSize:18, fontWeight:'bold', color:'yellow'}}>{" " + player.dealer}</span></div>
-										<div className="player-font">${player.bankroll}</div>
+										<div className="player-font">${player.bankroll}<span style={{fontSize:12, color:'yellow'}}>{" " + player.isAllIn}</span></div>
 									</div>
 								</div>
 							);

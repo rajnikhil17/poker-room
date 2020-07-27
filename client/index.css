@@ -687,8 +687,8 @@ div {
 
 .playerCards {
   margin: 3px;
-  width: 65%;
-  height: 85%;
+  width: 85%;
+  height: 100%;
   overflow: hidden;
 }
 

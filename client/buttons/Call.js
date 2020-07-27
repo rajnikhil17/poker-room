@@ -7,11 +7,13 @@ const Call = (props) => {
 		callAmount = props.bankroll + props.playerActiveBet
 	}
 
-	return (
-		<Button variant="contained" color="primary" onClick={props.call}>
-			Call: ${callAmount}
-		</Button>
-	);
+
+		return (
+			<Button variant="contained" color="primary" onClick={props.call}>
+				Call: ${callAmount}
+			</Button>
+		);
+
 };
 
 export default Call;

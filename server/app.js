@@ -148,17 +148,30 @@ io.on('connection', (socket) => {
 			if (gameState.showdown === true) {
 				// note, if player leaves during setTimeout window, state is stuck waiting until next player joins
 				determineWinner();
+				for(let i = 0; i < gameState.players.length; i++) {
+					gameState.players[i].isAllIn = '';
+				}
 				io.sockets.emit('gameState', gameState);
 				setTimeout(() => {
 					if (determineWinner()) {
 						for(let i = 0; i < gameState.players.length; i++) {
 							gameState.players[i].view = false;
 							gameState.players[i].button = false;
+							gameState.players[i].isAllIn = '';
 						}
 						resetPlayerAction();
 						moveBlinds();
 						dealPlayers();
+						/*
+						for(let i = 0; i < gameState.players.length; i++) {
 							io.sockets.emit('rebuy', determineLose())
+						}
+						*/
+						for (let i = 0; i < gameState.players.length; i++) {
+							if (gameState.players[i].bankroll <= 0) {
+								io.sockets.emit('rebuy', gameState.players[i].id)
+							}
+						}
 						gameState.minBet = 20
 						gameState.showdown = false;
 						gameState.winnerMessage = [];

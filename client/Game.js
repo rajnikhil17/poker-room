@@ -35,6 +35,7 @@ class Test extends Component {
 			name: '',
 			view: false,
 			dealer: '',
+			isAllIn: '',
 			gameState: {
 				spectators: [],
 				players: [],
@@ -42,6 +43,7 @@ class Test extends Component {
 				board: [],
 				activeBet: 0,
 				pot: 0,
+				pot2: 0,
 				messages: [],
 				winnerMessage: [],
 				started: false,
@@ -163,7 +165,7 @@ class Test extends Component {
 						<img className="table" src="poker_table.svg" />
 						<SoundEffects sound={this.state.sound} />
 						<Seats clientPlayer={clientPlayer} id={id} players={players} />
-						<Board pot={this.state.gameState.pot} players={players} board={this.state.gameState.board} />
+						<Board pot={this.state.gameState.pot} pot2={this.state.gameState.pot2} players={players} board={this.state.gameState.board} />
 						<PlayerCards players={this.state.gameState.players} id={this.state.id} />
 						<OpponentCards
 							spectator={this.state.spectator}
@@ -205,17 +207,15 @@ class Test extends Component {
 								Would you like to rebuy?
 							</Typography>
 						</DialogTitle>
-						<DialogContent>
-							<TextField margin="normal" onChange={this.handleChange} style={{ width: '100%' }} />
-						</DialogContent>
+
 						<DialogActions>
-							<div style={{ alignContent: 'center' }}>
-								<Button variant="contained" color="secondary" onClick={this.handleRebuy}>
-									Yes
-								</Button>
-								<Button variant="contained" color="secondary" onClick={this.handleClose}>
-									No
-								</Button>
+							<div style={{ flex:1, alignContent: 'center' }}>
+									<Button variant="contained" color="secondary" onClick={this.handleRebuy}>
+										Yes
+									</Button>
+									<Button variant="contained" color="secondary" onClick={this.handleClose}>
+										No
+									</Button>
 							</div>
 						</DialogActions>
 					</Dialog>

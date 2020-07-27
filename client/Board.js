@@ -2,6 +2,7 @@ import React from 'react';
 
 const Board = (props) => {
 	const pot = [ props.pot ];
+	const pot2 = [ props.pot ];
 	const board = props.board;
 	while (board.length < 5) {
 		board.push('empty');
@@ -25,6 +26,18 @@ const Board = (props) => {
 						return (
 							<div>
 								${p} <img className="chipImgBoard" src="/chips/chip.png" />
+							</div>
+						);
+					}
+				})}
+
+				{pot2.map((p2) => {
+					if (p2 === 0) {
+						return <div />;
+					} else {
+						return (
+							<div>
+								${p2} <img className="chipImgBoard" src="/chips/chip.png" />
 							</div>
 						);
 					}

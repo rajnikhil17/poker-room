@@ -9,8 +9,9 @@ const gameState = {
 	action: false,
 	board: [],
 	pot: 0,
-	bigBlindValue: 10,
-	smallBlindValue: 5,
+	pot2: 0,
+	bigBlindValue: 2,
+	smallBlindValue: 1,
 	activeBet: 0,
 	messages: [],
 	winnerMessage: [],
@@ -32,6 +33,7 @@ const addSpectators = (socketId) => {
 		smallBlind: false,
 		bigBlind: false,
 		dealer: '',
+		isAllIn: '',
 		active: false,
 		activeBet: 0,
 		rebuys: 0
@@ -211,43 +213,45 @@ const check = (socketId) => {
 			break;
 		}
 	}
-	if(gameState.players[i].view === false) {
-		gameState.players[i].action = true;
-		for (let j = 0; j < gameState.players.length; j++) {
-			gameState.players[j].active = false;
+	if(gameState.players[i] != null) {
+		if(gameState.players[i].view === false) {
+			gameState.players[i].action = true;
+			for (let j = 0; j < gameState.players.length; j++) {
+				gameState.players[j].active = false;
+			}
+			var count = 1;
+			while((i + count) <= gameState.players.length) {
+					if((i+count) === gameState.players.length) {
+						i = 0;
+						count = 0;
+					}
+					else if(gameState.players[i + count].view === true) {
+						count = count + 1;
+					}
+					else {
+						gameState.players[i+count].active = true;
+						break;
+					}
+			}
 		}
-		var count = 1;
-		while((i + count) <= gameState.players.length) {
-				if((i+count) === gameState.players.length) {
-					i = 0;
-					count = 0;
-				}
-				else if(gameState.players[i + count].view === true) {
-					count = count + 1;
-				}
-				else {
-					gameState.players[i+count].active = true;
-					break;
-				}
-		}
-	}
-	else {
-		for (let j = 0; j < gameState.players.length; j++) {
-			gameState.players[j].active = false;
-		}
-		var count = 1;
-		while((i + count) <= gameState.players.length) {
-				if((i+count) === gameState.players.length) {
-					i = 0;
-					count = 0;
-				}
-				else if(gameState.players[i + count].view === true) {
-					count = count + 1;
-				}
-				else {
-					gameState.players[i+count].active = true;
-					break;
-				}
+		else {
+			for (let j = 0; j < gameState.players.length; j++) {
+				gameState.players[j].active = false;
+			}
+			var count = 1;
+			while((i + count) <= gameState.players.length) {
+					if((i+count) === gameState.players.length) {
+						i = 0;
+						count = 0;
+					}
+					else if(gameState.players[i + count].view === true) {
+						count = count + 1;
+					}
+					else {
+						gameState.players[i+count].active = true;
+						break;
+					}
+			}
 		}
 	}
 
@@ -296,32 +300,76 @@ const potToTie = () => {
 	gameState.pot = 0;
 };
 
+const pot2ToPlayer = (player) => {
+	player.bankroll += gameState.pot2;
+	gameState.pot2 = 0;
+};
+
+
+const pot2ToTie = () => {
+	const halfPot = gameState.pot2 / 2;
+	gameState.players.forEach((player) => {
+		player.bankroll += halfPot;
+	});
+	gameState.pot2 = 0;
+};
+
 
 const determineWinner = () => {
 	const hands = gameState.players;
 	const board = gameState.board;
 
 	// check to see if any players have left during showdown to prevent server crash
-	if (gameState.players.length > 1 ){
-		const results = Ranker.orderHands(hands, board);
-		console.log(results)
-		// check for tie
-		if (results[0].length > 1) {
-			potToTie();
-			const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
-			gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
+	if(gameState.pot2 === 0) {
+		if (gameState.players.length > 1 ) {
+			const results = Ranker.orderHands(hands, board);
+			console.log(results)
+			// check for tie
+			if (results[0].length > 1) {
+				potToTie();
+				const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
+				gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
 
+			} else {
+				const winnerId = results[0][0].id;
+				const winner = gameState.players.filter((player) => player.id === winnerId)[0];
+				const winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
+				gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+				//delay
+				potToPlayer(winner)
+			}
+			return true
 		} else {
-			const winnerId = results[0][0].id;
-			const winner = gameState.players.filter((player) => player.id === winnerId)[0];
-			const winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
-			gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
-			//delay
-			potToPlayer(winner)
+			return false
 		}
-		return true
-	} else {
-		return false
+	}
+	else {
+		//pot --> only allIn player can win? or everyone can?
+		//pot2 --> only non-allIn players can win this
+
+
+		if (gameState.players.length > 1 ){
+			const results = Ranker.orderHands(hands, board);
+			console.log(results)
+			// check for tie
+			if (results[0].length > 1) {
+				potToTie();
+				const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
+				gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
+
+			} else {
+				const winnerId = results[0][0].id;
+				const winner = gameState.players.filter((player) => player.id === winnerId)[0];
+				const winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
+				gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+				//delay
+				potToPlayer(winner)
+			}
+			return true
+		} else {
+			return false
+		}
+
 	}
 
 };
@@ -385,6 +433,7 @@ const resetGame = () => {
 		player.active = false
 		player.view = false;
 		player.dealer = '';
+		player.isAllIn = '';
 		player.smallBlind = false;
 		player.bigBlind = false;
 		player.button = false;
@@ -392,15 +441,32 @@ const resetGame = () => {
 }
 
 const removePlayer = (socketId) => {
+	const player = gameState.players.filter((player) => player.id === socketId)[0];
+	if(player != null) {
+		player.cards = [];
+		player.activeBet = 0;
+		player.view = true;
+		check(socketId);
+	}
+	//gameState.players[0].action = true;
+	//gameState.players[0].dealer = true;
+
 	const oldPlayers = gameState.players.length
 	gameState.players = gameState.players.filter((player) => player.id !== socketId);
 	if (gameState.players.length !== oldPlayers) {
-		resetGame()
+		if(gameState.players.length > 1) {
+			gameState.players[0].action = true;
+		}
+		else {
+			resetGame();
+		}
+	//	resetGame()
 		// give pot to remaining player
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
+
 
 const fold = (socketId) => {
 		const player = gameState.players.filter((player) => player.id === socketId)[0];
@@ -422,12 +488,23 @@ const fold = (socketId) => {
 					const winner = gameState.players[i];
 					for(let j = 0; j < gameState.players.length; j++) {
 						gameState.players[j].view = false;
+						gameState.players[j].action = false;
+						gameState.players[j].isAllIn = '';
 					}
-			  	potToPlayer(winner);
-			  	dealPlayers();
-			  	resetPlayerAction();
-			  	moveBlinds();
-				  gameState.minBet = 20;
+
+					const winnerMsg = winner.name + ' won $' + gameState.pot;
+					gameState.messages.push({ text: winnerMsg, author: "GAME" });
+					//gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+					potToPlayer(winner);
+					//setTimeout(() => {
+							dealPlayers();
+							resetPlayerAction();
+							moveBlinds();
+							gameState.minBet = 20
+							gameState.winnerMessage = [];
+					//		console.log("winner message: " + gameState.winnerMessage);
+				//	}, 10000);
+
 					break;
 				}
 			}
@@ -454,6 +531,9 @@ const allInMode = () => {
 const call = (socketId) => {
 	const callingPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let callAmount = gameState.activeBet;
+	if (callingPlayer.bankroll <= 0 && gameState.players.length > 2) {
+		check();
+	}
 
 	// check if call is within player's bankroll, else adjust
 	if (callAmount > callingPlayer.bankroll + callingPlayer.activeBet) {
@@ -470,7 +550,22 @@ const call = (socketId) => {
 
 	// check to see if player is all in
 if (callingPlayer.bankroll <= 0) {
-	gameState.allIn = true
+	gameState.allIn = true;
+	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
+	allInPlayer.isAllIn = 'ALL IN';
+	if(gameState.players.length <= 2) {
+		//check();
+	//}
+	//else {
+		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
+		const winnerMsg = winner.name + ' won $' + gameState.pot;
+		gameState.messages.push({ text: winnerMsg, author: "GAME" });
+		potToPlayer(winner);
+		dealPlayers();
+		resetPlayerAction();
+		moveBlinds();
+		gameState.minBet = 20
+	}
 }
 	// use check function to move to next player
 	check(socketId);
@@ -497,7 +592,22 @@ gameState.minBet = betAmount * 2 + gameState.activeBet
 
 	// check to see if player is all in
 if (bettingPlayer.bankroll <= 0) {
-	gameState.allIn = true
+	gameState.allIn = true;
+	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
+	allInPlayer.isAllIn = 'ALL IN';
+	if(gameState.players.length <= 2) {
+	//	check();
+	//}
+	//else {
+		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
+		const winnerMsg = winner.name + ' won $' + gameState.pot;
+		gameState.messages.push({ text: winnerMsg, author: "GAME" });
+		potToPlayer(winner);
+		dealPlayers();
+		resetPlayerAction();
+		moveBlinds();
+		gameState.minBet = 20
+	}
 }
 
 	// reset action
@@ -534,7 +644,25 @@ console.log('raise difference', raiseDifference)
 
 		// check to see if player is all in
 if (raisingPlayer.bankroll <= 0) {
-	gameState.allIn = true
+	gameState.allIn = true;
+	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
+	allInPlayer.isAllIn = 'ALL IN';
+	/*
+	if(gameState.players.length <= 2) {
+	//	check();
+	//}
+	//else {
+		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
+		const winnerMsg = winner.name + ' won $' + gameState.pot;
+		gameState.messages.push({ text: winnerMsg, author: "GAME" });
+		potToPlayer(winner);
+		dealPlayers();
+		resetPlayerAction();
+		moveBlinds();
+		gameState.minBet = 20
+	}
+	*/
+
 }
 
 
@@ -577,7 +705,7 @@ const addName = (name, socketId) => {
 
 const rebuyPlayer = (socketId) => {
 	const clientPlayer = gameState.players.filter((player) => player.id === socketId)[0]
-	clientPlayer.bankroll = 1000
+	clientPlayer.bankroll = 200;
 	clientPlayer.rebuys += 1
 }
 

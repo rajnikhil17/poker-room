@@ -16,20 +16,13 @@ Fork/Clone the main repository. Once you have the it locally, run the following 
 
 ```
 npm install
+npm run build
 npm start
 ```
 You should now be able to view/play the game:
 
 * DEMO: localhost:3000
 
-## Deployment
-
-This project can be set up live using heroku with the following scripts:
-
-```
-create heroku <insert name>
-npm run deploy
-```
 
 ## Built With
 
@@ -37,12 +30,6 @@ npm run deploy
 * [Material UI](https://material-ui.com/) - React component library
 * [Socket.io](https://socket.io/) - JS library for real-time web apps
 * [Nodejs](https://nodejs.org/en/) - Back-end
-
-
-
-## Authors
-
-* **Jason Yang** - https://github.com/projectyang
 
 
 ## License

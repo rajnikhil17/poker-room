@@ -22,7 +22,19 @@ const Actions = (props) => {
 				}
 				else if (player.active === false || player.view === true) {
 					return <div className="buttons-container-hidden" key={player.id} />;
-				} else if (player.active && activeBet <= player.activeBet && showdown === false) {
+				}
+				else if (player.isAllIn === "ALL IN") {
+					return (
+					<div>
+					<div className="buttons-container" key={player.id}>
+						<div className="player-buttons">
+							<Check check={props.check} />
+						</div>
+					</div>
+					</div>
+				);
+				}
+				else if (player.active && activeBet <= player.activeBet && showdown === false) {
 					return (
 						<div>
 						<div className="buttons-container" key={player.id}>

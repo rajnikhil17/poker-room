@@ -10,6 +10,14 @@ const gameState = {
 	board: [],
 	pot: 0,
 	pot2: 0,
+	pot3: 0,
+	pot4: 0,
+	pot5: 0,
+	pot6: 0,
+	pot7: 0,
+	pot8: 0,
+	sidePot: 'pot',
+	allInPlayers: [],
 	bigBlindValue: 2,
 	smallBlindValue: 1,
 	activeBet: 0,
@@ -64,6 +72,13 @@ const dealPlayers = () => {
 const blindsToPot = () => {
 	// clear pot
 	gameState.pot = 0;
+	gameState.pot2 = 0;
+	gameState.pot3 = 0;
+	gameState.pot4 = 0;
+	gameState.pot5 = 0;
+	gameState.pot6 = 0;
+	gameState.pot7 = 0;
+	gameState.pot8 = 0;
 	gameState.players.forEach((player) => {
 		if (player.smallBlind) {
 			console.log("smallBlind is" + player.name);
@@ -293,31 +308,57 @@ const potToPlayer = (player) => {
 
 
 const potToTie = () => {
-	const halfPot = gameState.pot / 2;
+	var num_players = 0;
+	for (let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].view === false) {
+			num_players = num_players + 1;
+		}
+	}
+	const halfPot = gameState.pot / num_players;
 	gameState.players.forEach((player) => {
-		player.bankroll += halfPot;
+		if(player.view === false) {
+			player.bankroll += halfPot;
+		}
 	});
 	gameState.pot = 0;
 };
 
-const pot2ToPlayer = (player) => {
-	player.bankroll += gameState.pot2;
-	gameState.pot2 = 0;
-};
 
 
-const pot2ToTie = () => {
-	const halfPot = gameState.pot2 / 2;
-	gameState.players.forEach((player) => {
-		player.bankroll += halfPot;
-	});
-	gameState.pot2 = 0;
-};
+const incrementPot = () => {
+	if(gameState.sidePot === 'pot') {
+		gameState.sidePot = 'pot2';
+	}
+	else if (gameState.sidePot === 'pot2') {
+		gameState.sidePot = 'pot3';
+	}
+	else if (gameState.sidePot === 'pot3') {
+		gameState.sidePot = 'pot4';
+	}
+	else if (gameState.sidePot === 'pot4') {
+		gameState.sidePot = 'pot5';
+	}
+	else if (gameState.sidePot === 'pot5') {
+		gameState.sidePot = 'pot6';
+	}
+	else if (gameState.sidePot === 'pot6') {
+		gameState.sidePot = 'pot7';
+	}
+	else if (gameState.sidePot === 'pot7') {
+		gameState.sidePot = 'pot8';
+	}
+}
 
 
 const determineWinner = () => {
 	const hands = gameState.players;
 	const board = gameState.board;
+	var num_players = 0;
+	for (let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].view === false) {
+			num_players = num_players + 1;
+		}
+	}
 
 	// check to see if any players have left during showdown to prevent server crash
 	if(gameState.pot2 === 0) {
@@ -327,7 +368,7 @@ const determineWinner = () => {
 			// check for tie
 			if (results[0].length > 1) {
 				potToTie();
-				const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
+				const tieMsg = 'Tie pot, all players have ' + results[0][0].description;
 				gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
 
 			} else {
@@ -344,6 +385,7 @@ const determineWinner = () => {
 		}
 	}
 	else {
+
 		//pot --> only allIn player can win? or everyone can?
 		//pot2 --> only non-allIn players can win this
 
@@ -354,16 +396,86 @@ const determineWinner = () => {
 			// check for tie
 			if (results[0].length > 1) {
 				potToTie();
-				const tieMsg = 'Tie pot, both players have ' + results[0][0].description;
+				const tieMsg = 'Tie pot, all players have ' + results[0][0].description;
 				gameState.winnerMessage.push({ text: tieMsg, author: 'Game' });
 
 			} else {
 				const winnerId = results[0][0].id;
 				const winner = gameState.players.filter((player) => player.id === winnerId)[0];
-				const winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
-				gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
-				//delay
-				potToPlayer(winner)
+				if(winner.isAllIn === '') {
+					const totalPot = gameState.pot + gameState.pot2 + gameState.pot3 + gameState.pot4 + gameState.pot5 + gameState.pot6 + gameState.pot7 + gameState.pot8;
+					const winnerMsg = winner.name + ' won $' + totalPot + ' with ' + results[0][0].description;
+					gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+					winner.bankroll += totalPot;
+				}
+				else {
+					var i;
+					for(i = 0; i < gameState.allInPlayers.length; i++) {
+						if(gameState.allInPlayers[i] === winner) {
+							break;
+						}
+					}
+
+					var winnerMsg;
+					if(i === 0) {
+						//give pot to winner and divide rest of pot and give it to rest of playerCards
+						potToPlayer(winner);
+						winnerMsg = winner.name + ' won $' + gameState.pot + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot2 + gameState.pot3 + gameState.pot4 + gameState.pot5 + gameState.pot6 + gameState.pot7 + gameState.pot8)/(num_players-1);
+					}
+					else if (i === 1) {
+						winner.bankroll += gameState.pot2;
+						winnerMsg = winner.name + ' won $' + gameState.pot2 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot3 + gameState.pot4 + gameState.pot5 + gameState.pot6 + gameState.pot7 + gameState.pot8)/(num_players-2);
+					}
+					else if (i === 2) {
+						winner.bankroll += gameState.pot3;
+						winnerMsg = winner.name + ' won $' + gameState.pot3 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot4 + gameState.pot5 + gameState.pot6 + gameState.pot7 + gameState.pot8)/(num_players-3);
+					}
+					else if (i === 3) {
+						winner.bankroll += gameState.pot4;
+						winnerMsg = winner.name + ' won $' + gameState.pot4 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot5 + gameState.pot6 + gameState.pot7 + gameState.pot8)/(num_players-4);
+					}
+					else if (i === 4) {
+						winner.bankroll += gameState.pot5;
+						winnerMsg = winner.name + ' won $' + gameState.pot5 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot6 + gameState.pot7 + gameState.pot8)/(num_players-5);
+					}
+					else if (i === 5) {
+						winner.bankroll += gameState.pot6;
+						winnerMsg = winner.name + ' won $' + gameState.pot6 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot7 + gameState.pot8)/(num_players-6);
+					}
+					else if (i === 6) {
+						winner.bankroll += gameState.pot7;
+						winnerMsg = winner.name + ' won $' + gameState.pot7 + ' with ' + results[0][0].description;
+						var remaining = (gameState.pot8)/(num_players-7);
+					}
+					else if (i === 7) {
+						winner.bankroll += gameState.pot8;
+						winnerMsg = winner.name + ' won $' + gameState.pot8 + ' with ' + results[0][0].description;
+						var remaining = 0;
+					}
+					//give remaining pot back to players
+					gameState.players.forEach((player) => {
+						if(player.view === false && player.isAllIn === '') {
+							player.bankroll += remaining;
+						}
+					});
+					console.log("remaining: " + remaining);
+					gameState.winnerMessage.push({ text: winnerMsg, author: 'Game' });
+				}
+				//clear pots
+				gameState.pot = 0;
+				gameState.pot2 = 0;
+				gameState.pot3 = 0;
+				gameState.pot4 = 0;
+				gameState.pot5 = 0;
+				gameState.pot6 = 0;
+				gameState.pot7 = 0;
+				gameState.pot8 = 0;
 			}
 			return true
 		} else {
@@ -425,7 +537,8 @@ const resetGame = () => {
 	gameState.board = [];
 	gameState.messages = [];
 	gameState.winnerMessage = [];
-	gameState.minBet = 20
+	gameState.minBet = 20;
+	gameState.sidePot = 'pot';
 	gameState.started = false;
 	gameState.players.forEach((player) => {
 		player.cards = [];
@@ -539,8 +652,70 @@ const call = (socketId) => {
 	if (callAmount > callingPlayer.bankroll + callingPlayer.activeBet) {
 		callAmount = callingPlayer.bankroll + callingPlayer.activeBet
 	}
-	// add to pot call amount
-	gameState.pot += callAmount - callingPlayer.activeBet;
+
+	//count number of actual players
+	var num_players = 0;
+	for (let i = 0; i < gameState.players.length; i++) {
+		if(gameState.players[i].view === false) {
+			num_players = num_players + 1;
+		}
+	}
+		// add to pot bet amount
+		if(gameState.allIn === true && num_players > 2){
+			if (callingPlayer.isAllIn === '') {
+				//create and add to new side pot (side pot)
+				if(gameState.sidePot === 'pot') {
+					gameState.pot += callAmount - callingPlayer.activeBet;
+				} else if(gameState.sidePot === 'pot2') {
+					gameState.pot2 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot3') {
+					gameState.pot3 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot4') {
+					gameState.pot4 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot5') {
+					gameState.pot5 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot6') {
+					gameState.pot6 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot7') {
+					gameState.pot7 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot8') {
+					gameState.pot8 += callAmount - callingPlayer.activeBet;
+				}
+			}
+			else {
+				//add to latest pot (1 - current side pot num)
+				if(gameState.sidePot === 'pot2') {
+					gameState.pot += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot3') {
+					gameState.pot2 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot4') {
+					gameState.pot3 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot5') {
+					gameState.pot4 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot6') {
+					gameState.pot5 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot7') {
+					gameState.pot6 += callAmount - callingPlayer.activeBet;
+				}
+				else if(gameState.sidePot === 'pot8') {
+					gameState.pot7 += callAmount - callingPlayer.activeBet;
+				}
+			}
+		} else {
+			gameState.pot += callAmount - callingPlayer.activeBet;
+		}
+
 	callingPlayer.bankroll -= callAmount - callingPlayer.activeBet ;
 	callingPlayer.activeBet = callAmount;
 
@@ -553,10 +728,11 @@ if (callingPlayer.bankroll <= 0) {
 	gameState.allIn = true;
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
+	gameState.allInPlayers.push(allInPlayer);
+	if(gameState.players.length > 2) {
+		incrementPot();
+	}
 	if(gameState.players.length <= 2) {
-		//check();
-	//}
-	//else {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;
 		gameState.messages.push({ text: winnerMsg, author: "GAME" });
@@ -580,8 +756,71 @@ const bet = (socketId, actionAmount) => {
 	// adjust minimum raise
 gameState.minBet = betAmount * 2 + gameState.activeBet
 
+//count number of actual players
+var num_players = 0;
+for (let i = 0; i < gameState.players.length; i++) {
+	if(gameState.players[i].view === false) {
+		num_players = num_players + 1;
+	}
+}
 	// add to pot bet amount
-	gameState.pot += betAmount;
+	if(gameState.allIn === true && num_players > 2){
+		if (bettingPlayer.isAllIn === '') {
+			//create and add to new side pot (side pot)
+			if(gameState.sidePot === 'pot') {
+				gameState.pot += betAmount;
+			} else if(gameState.sidePot === 'pot2') {
+				gameState.pot2 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot3') {
+				gameState.pot3 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot4') {
+				gameState.pot4 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot5') {
+				gameState.pot5 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot6') {
+				gameState.pot6 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot7') {
+				gameState.pot7 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot8') {
+				gameState.pot8 += betAmount;
+			}
+		}
+		else {
+			//add to latest pot (1 - current side pot num)
+			if(gameState.sidePot === 'pot2') {
+				gameState.pot += betAmount;
+			}
+			else if(gameState.sidePot === 'pot3') {
+				gameState.pot2 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot4') {
+				gameState.pot3 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot5') {
+				gameState.pot4 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot6') {
+				gameState.pot5 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot7') {
+				gameState.pot6 += betAmount;
+			}
+			else if(gameState.sidePot === 'pot8') {
+				gameState.pot7 += betAmount;
+			}
+		}
+	} else {
+		gameState.pot += betAmount;
+	}
+
+
+
 	bettingPlayer.activeBet += betAmount;
 
 	// adjust game active bet
@@ -595,10 +834,11 @@ if (bettingPlayer.bankroll <= 0) {
 	gameState.allIn = true;
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
+	gameState.allInPlayers.push(allInPlayer);
+	if(gameState.players.length > 2) {
+		incrementPot();
+	}
 	if(gameState.players.length <= 2) {
-	//	check();
-	//}
-	//else {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;
 		gameState.messages.push({ text: winnerMsg, author: "GAME" });
@@ -636,8 +876,69 @@ console.log('active bet', gameState.activeBet)
 	// calculating difference in raise
 	const raiseDifference = gameState.minBet - gameState.activeBet
 console.log('raise difference', raiseDifference)
+
+//count number of actual players
+var num_players = 0;
+for (let i = 0; i < gameState.players.length; i++) {
+	if(gameState.players[i].view === false) {
+		num_players = num_players + 1;
+	}
+}
 	// add to pot bet amount
-	gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+	if(gameState.allIn === true && num_players > 2){
+		if (raisingPlayer.isAllIn === '') {
+			//create and add to new side pot (side pot)
+			if(gameState.sidePot === 'pot') {
+				gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+			} else if(gameState.sidePot === 'pot2') {
+				gameState.pot2 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot3') {
+				gameState.pot3 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot4') {
+				gameState.pot4 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot5') {
+				gameState.pot5 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot6') {
+				gameState.pot6 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot7') {
+				gameState.pot7 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot8') {
+				gameState.pot8 += gameState.minBet - raisingPlayer.activeBet;
+			}
+		}
+		else {
+			//add to latest pot (1 - current side pot num)
+			if(gameState.sidePot === 'pot2') {
+				gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot3') {
+				gameState.pot2 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot4') {
+				gameState.pot3 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot5') {
+				gameState.pot4 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot6') {
+				gameState.pot5 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot7') {
+				gameState.pot6 += gameState.minBet - raisingPlayer.activeBet;
+			}
+			else if(gameState.sidePot === 'pot8') {
+				gameState.pot7 += gameState.minBet - raisingPlayer.activeBet;
+			}
+		}
+	} else {
+		gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+	}
 
 	//subtract from player stack
 	raisingPlayer.bankroll -= gameState.minBet - raisingPlayer.activeBet;
@@ -647,11 +948,11 @@ if (raisingPlayer.bankroll <= 0) {
 	gameState.allIn = true;
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
-	/*
+	gameState.allInPlayers.push(allInPlayer);
+	if(gameState.players.length > 2) {
+		incrementPot();
+	}
 	if(gameState.players.length <= 2) {
-	//	check();
-	//}
-	//else {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;
 		gameState.messages.push({ text: winnerMsg, author: "GAME" });
@@ -661,8 +962,6 @@ if (raisingPlayer.bankroll <= 0) {
 		moveBlinds();
 		gameState.minBet = 20
 	}
-	*/
-
 }
 
 

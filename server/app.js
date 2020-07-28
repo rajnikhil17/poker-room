@@ -174,6 +174,7 @@ io.on('connection', (socket) => {
 						}
 						gameState.minBet = 20
 						gameState.showdown = false;
+						gameState.sidePot = 'pot';
 						gameState.winnerMessage = [];
 						//gameState.started = true;
 						gameState.allIn = false;

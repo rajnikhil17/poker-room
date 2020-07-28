@@ -44,6 +44,13 @@ class Test extends Component {
 				activeBet: 0,
 				pot: 0,
 				pot2: 0,
+				pot3: 0,
+				pot4: 0,
+				pot5: 0,
+				pot6: 0,
+				pot7: 0,
+				pot8: 0,
+				sidePot: 'pot',
 				messages: [],
 				winnerMessage: [],
 				started: false,
@@ -165,7 +172,7 @@ class Test extends Component {
 						<img className="table" src="poker_table.svg" />
 						<SoundEffects sound={this.state.sound} />
 						<Seats clientPlayer={clientPlayer} id={id} players={players} />
-						<Board pot={this.state.gameState.pot} pot2={this.state.gameState.pot2} players={players} board={this.state.gameState.board} />
+						<Board pot={this.state.gameState.pot} pot2={this.state.gameState.pot2} pot3={this.state.gameState.pot3} pot4={this.state.gameState.pot4} pot5={this.state.gameState.pot5} pot6={this.state.gameState.pot6} pot7={this.state.gameState.pot7} pot8={this.state.gameState.pot8} players={players} board={this.state.gameState.board} />
 						<PlayerCards players={this.state.gameState.players} id={this.state.id} />
 						<OpponentCards
 							spectator={this.state.spectator}

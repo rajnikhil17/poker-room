@@ -561,6 +561,14 @@ const removePlayer = (socketId) => {
 			break;
 		}
 	}
+
+	let x;
+	for(x = 0; x < gameState.spectators.length; x++) {
+		if (gameState.spectators[x] === removedPlayer) {
+			break;
+		}
+	}
+
 	var isTurn = 0;
 	if(removedPlayer != null) {
 		if(removedPlayer.active === true) {
@@ -569,6 +577,7 @@ const removePlayer = (socketId) => {
 	}
 
   gameState.players.splice(i, 1);
+
 
 		if(gameState.players.length > 1) {
 			if(isTurn === 1) {
@@ -583,7 +592,8 @@ const removePlayer = (socketId) => {
 			gameState.players.forEach((player) => potToPlayer(player));
 		}
 
-	//gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
+
+	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
 
 
@@ -592,6 +602,7 @@ const fold = (socketId) => {
 		player.cards = [];
 		player.activeBet = 0;
 		player.view = true;
+		player.fold = true;
 		check(socketId);
 
 		var num_active = 0;

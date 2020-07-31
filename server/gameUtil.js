@@ -632,6 +632,11 @@ const fold = (socketId) => {
 							moveBlinds();
 							gameState.minBet = 20
 							gameState.winnerMessage = [];
+							for (let i = 0; i < gameState.players.length; i++) {
+								if (gameState.players[i].bankroll <= 0) {
+									io.sockets.emit('rebuy', gameState.players[i].id)
+								}
+							}
 					//		console.log("winner message: " + gameState.winnerMessage);
 				//	}, 10000);
 

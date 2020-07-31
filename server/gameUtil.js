@@ -554,29 +554,35 @@ const resetGame = () => {
 }
 
 const removePlayer = (socketId) => {
-	const player = gameState.players.filter((player) => player.id === socketId)[0];
-	if(player != null) {
-		player.cards = [];
-		player.activeBet = 0;
-		player.view = true;
-		check(socketId);
-	}
-	//gameState.players[0].action = true;
-	//gameState.players[0].dealer = true;
-
-	const oldPlayers = gameState.players.length
-	gameState.players = gameState.players.filter((player) => player.id !== socketId);
-	if (gameState.players.length !== oldPlayers) {
-		if(gameState.players.length > 1) {
-			gameState.players[0].action = true;
+	const removedPlayer = gameState.players.filter((player) => player.id === socketId)[0];
+	let i;
+	for(i = 0; i < gameState.players.length; i++) {
+		if (gameState.players[i] === removedPlayer) {
+			break;
 		}
-		else {
+	}
+	var isTurn = 0;
+	if(removedPlayer != null) {
+		if(removedPlayer.active === true) {
+			isTurn = 1;
+		}
+	}
+
+  gameState.players.splice(i, 1);
+
+		if(gameState.players.length > 1) {
+			if(isTurn === 1) {
+				gameState.players[0].active = true;
+			}
+		}
+		else if(gameState.players.length < 1) {
 			resetGame();
 		}
-	//	resetGame()
-		// give pot to remaining player
-		gameState.players.forEach((player) => potToPlayer(player));
-	}
+		else if (gameState.players.length === 1) {
+			resetGame();
+			gameState.players.forEach((player) => potToPlayer(player));
+		}
+
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
 
@@ -644,14 +650,14 @@ const allInMode = () => {
 const call = (socketId) => {
 	const callingPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let callAmount = gameState.activeBet;
-	if (callingPlayer.bankroll <= 0 && gameState.players.length > 2) {
-		check();
-	}
 
 	// check if call is within player's bankroll, else adjust
 	if (callAmount > callingPlayer.bankroll + callingPlayer.activeBet) {
 		callAmount = callingPlayer.bankroll + callingPlayer.activeBet
 	}
+
+	/*
+	const callDifference = gameState.minBet - callAmount;
 
 	//count number of actual players
 	var num_players = 0;
@@ -661,60 +667,57 @@ const call = (socketId) => {
 		}
 	}
 		// add to pot bet amount
+
 		if(gameState.allIn === true && num_players > 2){
-			if (callingPlayer.isAllIn === '') {
-				//create and add to new side pot (side pot)
+			if(callingPlayer.isAllIn === '' && callAmount < gameState.minBet) {
+				console.log("CALL");
+				console.log("callAmount: " + callAmount);
+				console.log("callDifference: " + callDifference);
+				incrementPot();
 				if(gameState.sidePot === 'pot') {
 					gameState.pot += callAmount - callingPlayer.activeBet;
+
 				} else if(gameState.sidePot === 'pot2') {
 					gameState.pot2 += callAmount - callingPlayer.activeBet;
+					gameState.pot += callDifference;
+					gameState.allInPlayers[0].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot3') {
 					gameState.pot3 += callAmount - callingPlayer.activeBet;
+					gameState.pot2 += callDifference;
+					gameState.allInPlayers[1].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot4') {
 					gameState.pot4 += callAmount - callingPlayer.activeBet;
+					gameState.pot3 += callDifference;
+					gameState.allInPlayers[2].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot5') {
 					gameState.pot5 += callAmount - callingPlayer.activeBet;
+					gameState.pot4 += callDifference;
+					gameState.allInPlayers[3].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot6') {
 					gameState.pot6 += callAmount - callingPlayer.activeBet;
+					gameState.pot5 += callDifference;
+					gameState.allInPlayers[4].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot7') {
 					gameState.pot7 += callAmount - callingPlayer.activeBet;
+					gameState.pot6 += callDifference;
+					gameState.allInPlayers[5].bankroll -= callDifference;
 				}
 				else if(gameState.sidePot === 'pot8') {
 					gameState.pot8 += callAmount - callingPlayer.activeBet;
-				}
-			}
-			else {
-				//add to latest pot (1 - current side pot num)
-				if(gameState.sidePot === 'pot2') {
-					gameState.pot += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot3') {
-					gameState.pot2 += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot4') {
-					gameState.pot3 += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot5') {
-					gameState.pot4 += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot6') {
-					gameState.pot5 += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot7') {
-					gameState.pot6 += callAmount - callingPlayer.activeBet;
-				}
-				else if(gameState.sidePot === 'pot8') {
-					gameState.pot7 += callAmount - callingPlayer.activeBet;
+					gameState.pot7 += callDifference;
+					gameState.allInPlayers[6].bankroll -= callDifference;
 				}
 			}
 		} else {
 			gameState.pot += callAmount - callingPlayer.activeBet;
 		}
+		*/
+	gameState.pot += callAmount - callingPlayer.activeBet;
 
 	callingPlayer.bankroll -= callAmount - callingPlayer.activeBet ;
 	callingPlayer.activeBet = callAmount;
@@ -729,9 +732,7 @@ if (callingPlayer.bankroll <= 0) {
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
 	gameState.allInPlayers.push(allInPlayer);
-	if(gameState.players.length > 2) {
-		incrementPot();
-	}
+
 	if(gameState.players.length <= 2) {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;
@@ -755,6 +756,7 @@ const bet = (socketId, actionAmount) => {
 
 	// adjust minimum raise
 gameState.minBet = betAmount * 2 + gameState.activeBet
+const betDifference = betAmount - gameState.activeBet
 
 //count number of actual players
 var num_players = 0;
@@ -765,57 +767,85 @@ for (let i = 0; i < gameState.players.length; i++) {
 }
 	// add to pot bet amount
 	if(gameState.allIn === true && num_players > 2){
-		if (bettingPlayer.isAllIn === '') {
-			//create and add to new side pot (side pot)
+		console.log("BET:");
+		console.log("adding to new side pot: $" + betDifference);
+		console.log("adding to main pot: $" + gameState.activeBet);
+		if (bettingPlayer.isAllIn === '' && betDifference >= 0) {
+			incrementPot();
 			if(gameState.sidePot === 'pot') {
 				gameState.pot += betAmount;
+
+			} else if(gameState.sidePot === 'pot2') {
+				gameState.pot += gameState.activeBet;
+				gameState.pot2 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot3') {
+				gameState.pot2 += gameState.activeBet;
+				gameState.pot3 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot4') {
+				gameState.pot3 += gameState.activeBet;
+				gameState.pot4 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot5') {
+				gameState.pot4 += gameState.activeBet;
+				gameState.pot5 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot6') {
+				gameState.pot5 += gameState.activeBet;
+				gameState.pot6 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot7') {
+				gameState.pot6 += gameState.activeBet;
+				gameState.pot7 += betDifference;
+			}
+			else if(gameState.sidePot === 'pot8') {
+				gameState.pot7 += gameState.activeBet;
+				gameState.pot8 += betDifference;
+			}
+		}
+		else if (bettingPlayer.isAllIn === '' && betDifference < 0) {
+			incrementPot();
+			if(gameState.sidePot === 'pot') {
+				gameState.pot += gameState.minBet;
+
 			} else if(gameState.sidePot === 'pot2') {
 				gameState.pot2 += betAmount;
+				gameState.pot += betDifference;
+				gameState.allInPlayers[0].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot3') {
 				gameState.pot3 += betAmount;
+				gameState.pot2 += betDifference;
+				gameState.allInPlayers[1].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot4') {
 				gameState.pot4 += betAmount;
+				gameState.pot3 += betDifference;
+				gameState.allInPlayers[2].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot5') {
 				gameState.pot5 += betAmount;
+				gameState.pot4 += betDifference;
+				gameState.allInPlayers[3].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot6') {
 				gameState.pot6 += betAmount;
+				gameState.pot5 += betDifference;
+				gameState.allInPlayers[4].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot7') {
 				gameState.pot7 += betAmount;
+				gameState.pot6 += betDifference;
+				gameState.allInPlayers[5].bankroll -= betDifference;
 			}
 			else if(gameState.sidePot === 'pot8') {
 				gameState.pot8 += betAmount;
+				gameState.pot7 += betDifference;
+				gameState.allInPlayers[6].bankroll -= betDifference;
 			}
 		}
-		else {
-			//add to latest pot (1 - current side pot num)
-			if(gameState.sidePot === 'pot2') {
-				gameState.pot += betAmount;
-			}
-			else if(gameState.sidePot === 'pot3') {
-				gameState.pot2 += betAmount;
-			}
-			else if(gameState.sidePot === 'pot4') {
-				gameState.pot3 += betAmount;
-			}
-			else if(gameState.sidePot === 'pot5') {
-				gameState.pot4 += betAmount;
-			}
-			else if(gameState.sidePot === 'pot6') {
-				gameState.pot5 += betAmount;
-			}
-			else if(gameState.sidePot === 'pot7') {
-				gameState.pot6 += betAmount;
-			}
-			else if(gameState.sidePot === 'pot8') {
-				gameState.pot7 += betAmount;
-			}
-		}
-	} else {
+ 	} else {
 		gameState.pot += betAmount;
 	}
 
@@ -835,9 +865,7 @@ if (bettingPlayer.bankroll <= 0) {
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
 	gameState.allInPlayers.push(allInPlayer);
-	if(gameState.players.length > 2) {
-		incrementPot();
-	}
+
 	if(gameState.players.length <= 2) {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;
@@ -886,54 +914,83 @@ for (let i = 0; i < gameState.players.length; i++) {
 }
 	// add to pot bet amount
 	if(gameState.allIn === true && num_players > 2){
-		if (raisingPlayer.isAllIn === '') {
+		if (raisingPlayer.isAllIn === '' && raiseDifference >= 0) { //and bet is greater than pot then calculate extra and add to side pot
+			console.log("RAISE:");
+			console.log("adding to new side pot: $" + raiseDifference);
+			console.log("adding to main pot: $" + gameState.activeBet);
 			//create and add to new side pot (side pot)
+			incrementPot();
 			if(gameState.sidePot === 'pot') {
-				gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot += gameState.activeBet;
+
 			} else if(gameState.sidePot === 'pot2') {
-				gameState.pot2 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot += gameState.activeBet;
+				gameState.pot2 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot3') {
-				gameState.pot3 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot2 += gameState.activeBet;
+				gameState.pot3 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot4') {
-				gameState.pot4 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot3 += gameState.activeBet;
+				gameState.pot4 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot5') {
-				gameState.pot5 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot4 += gameState.activeBet;
+				gameState.pot5 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot6') {
-				gameState.pot6 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot5 += gameState.activeBet;
+				gameState.pot6 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot7') {
-				gameState.pot7 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot6 += gameState.activeBet;
+				gameState.pot7 += raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot8') {
-				gameState.pot8 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot7 += gameState.activeBet;
+				gameState.pot8 += raiseDifference;
 			}
 		}
-		else {
-			//add to latest pot (1 - current side pot num)
-			if(gameState.sidePot === 'pot2') {
-				gameState.pot += gameState.minBet - raisingPlayer.activeBet;
+		else if (raisingPlayer.isAllIn === '' && raiseDifference < 0) {
+			incrementPot();
+			if(gameState.sidePot === 'pot') {
+				gameState.pot += gameState.minBet;
+
+			} else if(gameState.sidePot === 'pot2') {
+				gameState.pot2 += gameState.minBet;
+				gameState.pot += raiseDifference;
+				gameState.allInPlayers[0].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot3') {
-				gameState.pot2 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot3 += gameState.minBet;
+				gameState.pot2 += raiseDifference;
+				gameState.allInPlayers[1].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot4') {
-				gameState.pot3 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot4 += gameState.minBet;
+				gameState.pot3 += raiseDifference;
+				gameState.allInPlayers[2].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot5') {
-				gameState.pot4 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot5 += gameState.minBet;
+				gameState.pot4 += raiseDifference;
+				gameState.allInPlayers[3].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot6') {
-				gameState.pot5 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot6 += gameState.minBet;
+				gameState.pot5 += raiseDifference;
+				gameState.allInPlayers[4].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot7') {
-				gameState.pot6 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot7 += gameState.minBet;
+				gameState.pot6 += raiseDifference;
+				gameState.allInPlayers[5].bankroll -= raiseDifference;
 			}
 			else if(gameState.sidePot === 'pot8') {
-				gameState.pot7 += gameState.minBet - raisingPlayer.activeBet;
+				gameState.pot8 += gameState.minBet;
+				gameState.pot7 += raiseDifference;
+				gameState.allInPlayers[6].bankroll -= raiseDifference;
 			}
 		}
 	} else {
@@ -949,9 +1006,7 @@ if (raisingPlayer.bankroll <= 0) {
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
 	gameState.allInPlayers.push(allInPlayer);
-	if(gameState.players.length > 2) {
-		incrementPot();
-	}
+
 	if(gameState.players.length <= 2) {
 		const winner = gameState.players.filter((player) => player.id !== socketId)[0];
 		const winnerMsg = winner.name + ' won $' + gameState.pot;

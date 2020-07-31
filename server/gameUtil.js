@@ -585,7 +585,10 @@ const removePlayer = (socketId) => {
 		}
 	}
 
-	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
+	if(gameState.spectators.length > 0) {
+		gameState.spectators.pop();
+	}
+//	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
   gameState.players.splice(i, 1);
 	console.log("NUM PLAYERS: " + gameState.players.length);
 	console.log("NUM SPECTATORS: " + gameState.spectators.length);

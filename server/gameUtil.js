@@ -222,6 +222,8 @@ const moveBlinds = () => {
 };
 
 const check = (socketId) => {
+	console.log("CHECK");
+	console.log("num players " + gameState.players.length);
 	var i;
 	for (i = 0; i < gameState.players.length; i++) {
 		if (gameState.players[i].id === socketId) {
@@ -235,6 +237,8 @@ const check = (socketId) => {
 				gameState.players[j].active = false;
 			}
 			var count = 1;
+
+			console.log("i is " + i);
 			while((i + count) <= gameState.players.length) {
 					if((i+count) === gameState.players.length) {
 						i = 0;
@@ -245,6 +249,11 @@ const check = (socketId) => {
 					}
 					else {
 						gameState.players[i+count].active = true;
+						gameState.players[i].action = true;
+						gameState.players[i].button = true;
+						console.log("i+count is " + (i + count));
+						console.log("active player should be " + gameState.players[i+count].name);
+						console.log("should be here");
 						break;
 					}
 			}
@@ -576,8 +585,10 @@ const removePlayer = (socketId) => {
 		}
 	}
 
+	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
   gameState.players.splice(i, 1);
-
+	console.log("NUM PLAYERS: " + gameState.players.length);
+	console.log("NUM SPECTATORS: " + gameState.spectators.length);
 
 		if(gameState.players.length > 1) {
 			if(isTurn === 1) {
@@ -591,9 +602,6 @@ const removePlayer = (socketId) => {
 			resetGame();
 			gameState.players.forEach((player) => potToPlayer(player));
 		}
-
-
-	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
 };
 
 
@@ -664,6 +672,7 @@ const allInMode = () => {
 
 
 const call = (socketId) => {
+	console.log("CALL");
 	const callingPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let callAmount = gameState.activeBet;
 
@@ -741,9 +750,10 @@ const call = (socketId) => {
 	console.log('call amount', callAmount)
 	console.log('calling player activeBet', callingPlayer.activeBet)
 	// subtract from player stack
-
+console.log("test point 1");
 	// check to see if player is all in
 if (callingPlayer.bankroll <= 0) {
+	console.log("test point 2");
 	gameState.allIn = true;
 	const allInPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	allInPlayer.isAllIn = 'ALL IN';
@@ -761,6 +771,7 @@ if (callingPlayer.bankroll <= 0) {
 	}
 }
 	// use check function to move to next player
+	console.log("test point 3");
 	check(socketId);
 };
 
@@ -904,6 +915,7 @@ console.log('betting set the minbet to:', gameState.minBet)
 };
 
 const raise = (socketId, actionAmount) => {
+	console.log("RAISE");
 	const raisingPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 
 	let raiseAmount = actionAmount;

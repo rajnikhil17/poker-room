@@ -2,6 +2,7 @@ import React from 'react';
 
 const Chip = (props) => {
 	const spectator = props.spectator;
+	console.log("is spectator? " + spectator);
 	const id = props.id;
 	const players = props.players;
 	const view = props.view;
@@ -14,7 +15,7 @@ const Chip = (props) => {
 		}
 	})
 
-	if (!spectator || !view) {
+	if (!spectator) {
 		return (
 			<div>
 				{players.map((player) => {

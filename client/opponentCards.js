@@ -3,6 +3,8 @@ import React from 'react';
 const OpponentCards = (props) => {
 	const showdown = props.showdown;
 	const players = props.players;
+	const spectator = props.spectator;
+	console.log("is spectator? " + spectator);
 	const id = props.id;
 	const messages = props.messages;
 	var left = 1;
@@ -14,10 +16,11 @@ const OpponentCards = (props) => {
 			client_index = players.indexOf(player);
 		}
 	})
-
+	console.log("before any if statements");
 	const otherPlayer = players.filter((player) => player.id !== id);
 	// player view
-	if (!props.spectator || !props.view) {
+	if (!spectator) {
+		console.log("if spectator");
 		return (
 				otherPlayer.map((player) => {
 					//display cards for players seated to the left of client player
@@ -72,12 +75,13 @@ const OpponentCards = (props) => {
 				})
 
 		); // spectator view
-	} else {
+	} else if(spectator){
 		left = 0;
+		console.log("not spectator");
 		return (
 		//	<div>
 			<div>
-					{otherPlayer.map((player) => {
+					{players.map((player) => {
 						left = left + 1;
 						if (player.cards.length > 0 && showdown === false) {
 							return (
@@ -88,7 +92,7 @@ const OpponentCards = (props) => {
 							);
 						} else if (player.cards.length > 0 && showdown === true) {
 							return (
-								<div className={'boardInner'}>
+								<div className={'boardInner-' + left}>
 									<img className="playerCards" src={`/cardImages/${player.cards[0]}.png`} />
 									<img className="playerCards" src={`/cardImages/${player.cards[1]}.png`} />
 								</div>
@@ -98,7 +102,7 @@ const OpponentCards = (props) => {
 						}
 					})}
 					</div>
-					/*
+/*
 				<div className="playerBoard">
 					{otherPlayer.map((player) => {
 						if (player.cards.length > 0 && showdown === false && otherPlayer.indexOf(player) === 0) {
@@ -121,7 +125,7 @@ const OpponentCards = (props) => {
 					})}
 				</div>
 				</div>
-				*/
+*/
 		);
 	}
 };

@@ -224,9 +224,13 @@ const moveBlinds = () => {
 const check = (socketId) => {
 	console.log("CHECK");
 	console.log("num players " + gameState.players.length);
+	for (i = 0; i < gameState.players.length; i++) {
+		console.log(gameState.players[i].name);
+	}
 	var i;
 	for (i = 0; i < gameState.players.length; i++) {
 		if (gameState.players[i].id === socketId) {
+			console.log(gameState.players[i].id);
 			break;
 		}
 	}
@@ -238,7 +242,6 @@ const check = (socketId) => {
 			}
 			var count = 1;
 
-			console.log("i is " + i);
 			while((i + count) <= gameState.players.length) {
 					if((i+count) === gameState.players.length) {
 						i = 0;
@@ -249,11 +252,8 @@ const check = (socketId) => {
 					}
 					else {
 						gameState.players[i+count].active = true;
-						gameState.players[i].action = true;
+						//gameState.players[i].action = true;
 						gameState.players[i].button = true;
-						console.log("i+count is " + (i + count));
-						console.log("active player should be " + gameState.players[i+count].name);
-						console.log("should be here");
 						break;
 					}
 			}
@@ -563,7 +563,7 @@ const resetGame = () => {
 }
 
 const removePlayer = (socketId) => {
-	/*
+
 	const removedPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let i;
 	for(i = 0; i < gameState.players.length; i++) {
@@ -585,11 +585,12 @@ const removePlayer = (socketId) => {
 			isTurn = 1;
 		}
 	}
-
+/*
 	if(gameState.spectators.length > 0) {
 		gameState.spectators.pop();
 	}
-//	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
+	*/
+	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
   gameState.players.splice(i, 1);
 	console.log("NUM PLAYERS: " + gameState.players.length);
 	console.log("NUM SPECTATORS: " + gameState.spectators.length);
@@ -606,7 +607,7 @@ const removePlayer = (socketId) => {
 			resetGame();
 			gameState.players.forEach((player) => potToPlayer(player));
 		}
-		*/
+		/*
 		const oldPlayers = gameState.players.length
 	gameState.players = gameState.players.filter((player) => player.id !== socketId);
 	if (gameState.players.length !== oldPlayers) {
@@ -615,6 +616,7 @@ const removePlayer = (socketId) => {
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
+	*/
 };
 
 

@@ -564,6 +564,7 @@ const resetGame = () => {
 
 const removePlayer = (socketId) => {
 
+	/*
 	const removedPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let i;
 	for(i = 0; i < gameState.players.length; i++) {
@@ -585,11 +586,11 @@ const removePlayer = (socketId) => {
 			isTurn = 1;
 		}
 	}
-/*
-	if(gameState.spectators.length > 0) {
-		gameState.spectators.pop();
-	}
-	*/
+
+	//if(gameState.spectators.length > 0) {
+	//	gameState.spectators.pop();
+	//}
+
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
   gameState.players.splice(i, 1);
 	console.log("NUM PLAYERS: " + gameState.players.length);
@@ -607,7 +608,8 @@ const removePlayer = (socketId) => {
 			resetGame();
 			gameState.players.forEach((player) => potToPlayer(player));
 		}
-		/*
+		*/
+
 		const oldPlayers = gameState.players.length
 	gameState.players = gameState.players.filter((player) => player.id !== socketId);
 	if (gameState.players.length !== oldPlayers) {
@@ -616,7 +618,7 @@ const removePlayer = (socketId) => {
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
-	*/
+	
 };
 
 

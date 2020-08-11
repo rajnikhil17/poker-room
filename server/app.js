@@ -83,8 +83,6 @@ io.on('connection', (socket) => {
 	addSpectators(socket.id);
 
 	socket.on('join', () => {
-		const newPlayer = gameState.spectators.filter((player) => player.id === socket.id)[0];
-		newPlayer.seated = true;
 		addPlayer(socket.id);
 		if (gameState.players.length > 7) {
 			gameState.players[0].dealer = 'D';
@@ -216,8 +214,6 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnect', () => {
 		console.log('player has disconnected', socket.id);
-		const newPlayer = gameState.players.filter((player) => player.id === socket.id)[0];
-		newPlayer.seated = false;
 		removePlayer(socket.id);
 		io.sockets.emit('gameState', gameState);
 	});

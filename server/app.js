@@ -83,8 +83,9 @@ io.on('connection', (socket) => {
 	addSpectators(socket.id);
 
 	socket.on('join', () => {
+		const newPlayer = gameState.spectators.filter((player) => player.id === socket.id)[0];
+		newPlayer.seated = true;
 		addPlayer(socket.id);
-
 		if (gameState.players.length > 7) {
 			gameState.players[0].dealer = 'D';
 			gameState.started = true;
@@ -155,6 +156,7 @@ io.on('connection', (socket) => {
 				setTimeout(() => {
 					if (determineWinner()) {
 						for(let i = 0; i < gameState.players.length; i++) {
+							console.log("num players app.js: " + gameState.players.length);
 							gameState.players[i].view = false;
 							gameState.players[i].button = false;
 							gameState.players[i].isAllIn = '';
@@ -214,6 +216,8 @@ io.on('connection', (socket) => {
 
 	socket.on('disconnect', () => {
 		console.log('player has disconnected', socket.id);
+		const newPlayer = gameState.players.filter((player) => player.id === socket.id)[0];
+		newPlayer.seated = false;
 		removePlayer(socket.id);
 		io.sockets.emit('gameState', gameState);
 	});

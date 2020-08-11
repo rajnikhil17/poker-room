@@ -618,7 +618,7 @@ const removePlayer = (socketId) => {
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
-	
+
 };
 
 

@@ -22,6 +22,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
 let socket;
 const mapStateToProps = (state) => ({ state });
@@ -36,6 +37,7 @@ class Test extends Component {
 			view: false,
 			dealer: '',
 			isAllIn: '',
+			seated: false,
 			gameState: {
 				spectators: [],
 				players: [],
@@ -158,20 +160,35 @@ class Test extends Component {
 		this.setState({ rebuyWindow: false, joined: false });
 	}
 
+	state= {
+		showTimer: false,
+	}
+
 	render() {
 		const players = this.state.gameState.players;
 		const id = this.state.id;
 		const clientPlayer = players.filter((player) => player.id === id);
+
 		if (this.state.name === '') {
 			return <Lobby players={players} spectators={this.state.gameState.spectators} addName={this.addName} />;
 		} else {
+			/*
+			//check to see if timer should be shown
+			if(this.state.gameState.showdown === false) {
+				{players.map((player) => {
+					if(player.active === true) {
+						this.setState({ showTimer: true });
+					}
+				})}
+			}
+*/
 			return (
 				<div style={{height: '100%'}}>
 						<Start joined={this.state.joined} started={this.state.gameState.started} players={this.state.gameState.players} start={this.start} />
 					<div className="container">
 						<img className="table" src="poker_table.svg" />
 						<SoundEffects sound={this.state.sound} />
-						<Seats clientPlayer={clientPlayer} id={id} players={players} />
+						<Seats clientPlayer={clientPlayer} id={id} players={players}/>
 						<Board pot={this.state.gameState.pot} pot2={this.state.gameState.pot2} pot3={this.state.gameState.pot3} pot4={this.state.gameState.pot4} pot5={this.state.gameState.pot5} pot6={this.state.gameState.pot6} pot7={this.state.gameState.pot7} pot8={this.state.gameState.pot8} players={players} board={this.state.gameState.board} />
 						<PlayerCards players={this.state.gameState.players} id={this.state.id} />
 						<OpponentCards
@@ -190,6 +207,23 @@ class Test extends Component {
 							clientPlayer={clientPlayer}
 						/>
 					</div>
+					/*
+					{this.state.showTimer?<CountdownCircleTimer
+						isPlaying
+						duration={30}
+						colors={[
+							['#004777', 0.4],
+							['#F7B801', 0.4],
+							['#A30000', 0.2],
+						]}
+						onComplete={() => {
+							 this.fold();
+							 return [true, 0] // repeat animation in 1.5 seconds
+						 }}
+					>
+						{({ remainingTime }) => remainingTime}
+					</CountdownCircleTimer>:null}
+*/
 					<Actions
 						minBet={this.state.gameState.minBet}
 						betAmount={this.state.betAmount}
@@ -204,7 +238,7 @@ class Test extends Component {
 						activeBet={this.state.gameState.activeBet}
 						view={this.state.view}
 					/>
-					<Join joined={this.state.joined} spectator={this.state.spectator} started={this.state.gameState.started} players={this.state.gameState.players} join={this.join}/>
+					<Join seated={this.state.seated} joined={this.state.joined} spectator={this.state.spectator} started={this.state.gameState.started} players={this.state.gameState.players} join={this.join}/>
 					<WinnerMessage winnerMessage={this.state.gameState.winnerMessage} />
 					<Chatbox messages={this.state.gameState.messages} messageSubmit={this.messageSubmit} />
 					<Dialog open={this.state.rebuyWindow} onClose={this.handleClose}>

@@ -23,7 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
-import Timer from './Timer';
+
 
 let socket;
 const mapStateToProps = (state) => ({ state });

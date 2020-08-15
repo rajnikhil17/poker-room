@@ -7,6 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 class Lobby extends Component {
@@ -14,13 +15,18 @@ class Lobby extends Component {
 		super(props);
 		this.state = {
    open: false,
-   name: ''
+   name: '',
+	 room: '',
 		};
 	}
 
- handleChange = (event) => {
+ handleChangeName = (event) => {
   this.setState({ name: event.target.value });
 	}
+
+	handleChangeRoom = (event) => {
+   this.setState({ room: event.target.value });
+ 	}
 
 	handleClickOpen = () => {
 		this.setState({ open: true });
@@ -29,7 +35,7 @@ class Lobby extends Component {
 	handleClose = () => {
   this.setState({ open: false });
   this.props.addName(this.state.name)
-  console.log(this.state.name)
+	this.props.addRoom(this.state.room)
 	};
 	render() {
 		return (
@@ -65,15 +71,23 @@ class Lobby extends Component {
 					</div>
 				</Paper>
 				<Dialog open={this.state.open} onClose={this.handleClose}>
-					<DialogTitle >	<Typography align="center" variant="subheading" gutterBottom>
-							Please enter your name:
-						</Typography></DialogTitle>
 					<DialogContent>
-     <TextField
-          margin="normal"
-          onChange={this.handleChange}
-          style={{width: '100%'}}
-        />
+								<DialogContentText >	<Typography align="center" variant="subheading" gutterBottom>
+										Please enter your name:
+									</Typography></DialogContentText>
+						     <TextField
+						          margin="normal"
+						          onChange={this.handleChangeName}
+						          style={{width: '100%'}}
+						      />
+								<DialogContentText >	<Typography align="center" variant="subheading" gutterBottom>
+										Please enter Room ID:
+									</Typography></DialogContentText>
+								 <TextField
+											margin="normal"
+											onChange={this.handleChangeRoom}
+											style={{width: '100%'}}
+								 />
 					</DialogContent>
 					<DialogActions>
       <div style={{ alignContent: 'center'}}>

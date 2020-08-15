@@ -23,6 +23,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { CountdownCircleTimer } from 'react-countdown-circle-timer';
+import Timer from './Timer';
 
 let socket;
 const mapStateToProps = (state) => ({ state });
@@ -34,6 +35,7 @@ class Test extends Component {
 		this.state = {
 			id: '',
 			name: '',
+			room: '',
 			view: false,
 			dealer: '',
 			isAllIn: '',
@@ -71,6 +73,7 @@ class Test extends Component {
 		this.raise = this.raise.bind(this);
 		this.messageSubmit = this.messageSubmit.bind(this);
 		this.addName = this.addName.bind(this);
+		this.addRoom = this.addRoom.bind(this);
 		this.join = this.join.bind(this);
 		this.start = this.start.bind(this);
 		this.changeBet = this.changeBet.bind(this);
@@ -98,16 +101,19 @@ class Test extends Component {
 	fold() {
 		const action = { type: 'fold' };
 		socket.emit('action', action);
+		this.setState(key => key + 1);
 	}
 
 	check() {
 		const action = { type: 'check' };
 		socket.emit('action', action);
+		this.setState(key => key + 1);
 	}
 
 	call() {
 		const action = { type: 'call' };
 		socket.emit('action', action);
+		this.setState(key => key + 1);
 	}
 
 	bet() {
@@ -115,6 +121,7 @@ class Test extends Component {
 		socket.emit('action', action);
 		//clear bet after player action
 		this.setState({ betAmount: 0 });
+		this.setState(key => key + 1);
 	}
 
 	changeBet(amount) {
@@ -124,6 +131,7 @@ class Test extends Component {
 	raise() {
 		const action = { type: 'raise', amount: this.state.betAmount };
 		socket.emit('action', action);
+		this.setState(key => key + 1);
 	}
 
 	messageSubmit(message) {
@@ -133,6 +141,11 @@ class Test extends Component {
 	addName(name) {
 		this.setState({ name });
 		socket.emit('addName', name);
+	}
+
+	addRoom(room) {
+		this.setState({ room });
+		socket.emit('addRoom', room);
 	}
 
 	join() {
@@ -161,7 +174,7 @@ class Test extends Component {
 	}
 
 	state= {
-		showTimer: false,
+		key:0,
 	}
 
 	render() {
@@ -170,7 +183,7 @@ class Test extends Component {
 		const clientPlayer = players.filter((player) => player.id === id);
 
 		if (this.state.name === '') {
-			return <Lobby players={players} spectators={this.state.gameState.spectators} addName={this.addName} />;
+			return <Lobby players={players} spectators={this.state.gameState.spectators} addName={this.addName} addRoom={this.addRoom} />;
 		} else {
 			/*
 			//check to see if timer should be shown
@@ -181,7 +194,7 @@ class Test extends Component {
 					}
 				})}
 			}
-*/
+			*/
 			return (
 				<div style={{height: '100%'}}>
 						<Start joined={this.state.joined} started={this.state.gameState.started} players={this.state.gameState.players} start={this.start} />
@@ -207,10 +220,13 @@ class Test extends Component {
 							clientPlayer={clientPlayer}
 						/>
 					</div>
-					/*
-					{this.state.showTimer?<CountdownCircleTimer
+
+					<div style={{marginLeft:'10%'}}>
+					{(this.state.gameState.started)?<CountdownCircleTimer
+						key={this.state.key}
 						isPlaying
 						duration={30}
+						size={100}
 						colors={[
 							['#004777', 0.4],
 							['#F7B801', 0.4],
@@ -218,12 +234,14 @@ class Test extends Component {
 						]}
 						onComplete={() => {
 							 this.fold();
+							 this.check();
 							 return [true, 0] // repeat animation in 1.5 seconds
 						 }}
 					>
 						{({ remainingTime }) => remainingTime}
 					</CountdownCircleTimer>:null}
-*/
+					</div>
+
 					<Actions
 						minBet={this.state.gameState.minBet}
 						betAmount={this.state.betAmount}
@@ -237,6 +255,8 @@ class Test extends Component {
 						check={this.check}
 						activeBet={this.state.gameState.activeBet}
 						view={this.state.view}
+						fold = {this.fold}
+						check = {this.check}
 					/>
 					<Join seated={this.state.seated} joined={this.state.joined} spectator={this.state.spectator} started={this.state.gameState.started} players={this.state.gameState.players} join={this.join}/>
 					<WinnerMessage winnerMessage={this.state.gameState.winnerMessage} />

@@ -21,6 +21,7 @@ const {
 	view,
 	addMessage,
 	addName,
+	addRoom,
 	addSpectators,
 	resetPlayerAction,
 	moveBlinds,
@@ -209,6 +210,17 @@ io.on('connection', (socket) => {
 
 	socket.on('addName', (name) => {
 		addName(name, socket.id);
+		io.sockets.emit('gameState', gameState);
+	});
+
+	socket.on('addRoom', (room) => {
+		addRoom(room, socket.id);
+		io.sockets.emit('gameState', gameState);
+	});
+
+	socket.on('leaveRoom', () => {
+		console.log('player has left room', socket.id);
+		removePlayer(socket.id);
 		io.sockets.emit('gameState', gameState);
 	});
 

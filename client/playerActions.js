@@ -5,6 +5,7 @@ import Check from './buttons/Check';
 import Fold from './buttons/Fold';
 import Call from './buttons/Call';
 import BetSlider from './buttons/Slider'
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
 const Actions = (props) => {
 	const showdown = props.showdown;
@@ -18,14 +19,25 @@ const Actions = (props) => {
 				{
 					player.active = false;
 					console.log("Player " + player.name + " view is " + player.view);
-					return <div className="buttons-container-hidden" key={player.id} />;
+					return (
+						<div>
+
+							<div className="buttons-container-hidden" key={player.id} />;
+						</div>
+					);
 				}
 				else if (player.active === false || player.view === true) {
-					return <div className="buttons-container-hidden" key={player.id} />;
+					return (
+						<div>
+
+							<div className="buttons-container-hidden" key={player.id} />;
+						</div>
+					);
 				}
 				else if (player.isAllIn === "ALL IN") {
 					return (
 					<div>
+
 					<div className="buttons-container" key={player.id}>
 						<div className="player-buttons">
 							<Check check={props.check} />
@@ -37,6 +49,7 @@ const Actions = (props) => {
 				else if (player.active && activeBet <= player.activeBet && showdown === false) {
 					return (
 						<div>
+
 						<div className="buttons-container" key={player.id}>
 							<div className="player-buttons">
 								<Bet  betAmount={props.betAmount} bet={props.bet} activeBet={activeBet} />
@@ -57,6 +70,7 @@ const Actions = (props) => {
 				} else if (player.active && activeBet > player.activeBet && showdown === false) {
 					return (
 						<div>
+
 						<div className="buttons-container" key={player.id}>
 							<div className="player-buttons">
 								<Bet  betAmount={props.betAmount} bet={props.bet} activeBet={activeBet} />

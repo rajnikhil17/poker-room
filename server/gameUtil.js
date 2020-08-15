@@ -33,6 +33,7 @@ const addSpectators = (socketId) => {
 	gameState.spectators.push({
 		id: socketId,
 		name: '',
+		room: '',
 		view: false,
 		bankroll: 1000,
 		cards: [],
@@ -551,6 +552,7 @@ const resetGame = () => {
 	gameState.started = false;
 	gameState.players.forEach((player) => {
 		player.cards = [];
+		player.room = '';
 		player.activeBet = 0;
 		player.active = false
 		player.view = false;
@@ -1102,6 +1104,11 @@ const addName = (name, socketId) => {
 	changePlayer.name = name;
 };
 
+const addRoom = (room, socketId) => {
+	const changePlayer = gameState.spectators.filter((player) => player.id === socketId)[0];
+	changePlayer.room = room;
+};
+
 const rebuyPlayer = (socketId) => {
 	const clientPlayer = gameState.players.filter((player) => player.id === socketId)[0]
 	clientPlayer.bankroll = 200;
@@ -1132,6 +1139,7 @@ module.exports = {
 	raise,
 	addMessage,
 	addName,
+	addRoom,
 	addSpectators,
 	resetPlayerAction,
 	determineLose,

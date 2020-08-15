@@ -26,6 +26,7 @@
     "pg": "^7.4.1",
     "pg-hstore": "^2.3.2",
     "react": "^16.2.0",
+    "react-countdown-circle-timer": "^2.3.7",
     "react-dom": "^16.2.0",
     "react-infinite": "^0.13.0",
     "react-rangeslider": "^2.2.0",

@@ -236,6 +236,12 @@ io.on('connection', (socket) => {
 		io.sockets.emit('gameState', gameState);
 	});
 
+	socket.on('resetGame', () => {
+		console.log('reset game');
+		resetGame();
+		io.sockets.emit('gameState', gameState);
+	});
+
 	socket.on('disconnect', () => {
 		console.log('player has disconnected', socket.id);
 		removePlayer(socket.id);

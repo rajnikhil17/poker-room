@@ -31,7 +31,8 @@ const {
 	resetGame,
 	rebuyPlayer,
 	winnerMessage,
-	spectatePlayer
+	spectatePlayer,
+	resetTimer
 } = require('./gameUtil');
 
 // Logging middleware
@@ -218,9 +219,20 @@ io.on('connection', (socket) => {
 		io.sockets.emit('gameState', gameState);
 	});
 
+	socket.on('setToLobby', () => {
+		setToLobby(socket.id);
+		io.sockets.emit('gameState', gameState);
+	});
+
 	socket.on('leaveRoom', () => {
 		console.log('player has left room', socket.id);
 		removePlayer(socket.id);
+		io.sockets.emit('gameState', gameState);
+	});
+
+	socket.on('resetTimer', () => {
+		console.log('timer reset');
+		resetTimer();
 		io.sockets.emit('gameState', gameState);
 	});
 

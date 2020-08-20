@@ -26,7 +26,8 @@ const gameState = {
 	started: false,
 	showdown: false,
 	minBet: 20,
-	allIn: false
+	allIn: false,
+	key: 0,
 };
 
 const addSpectators = (socketId) => {
@@ -34,6 +35,7 @@ const addSpectators = (socketId) => {
 		id: socketId,
 		name: '',
 		room: '',
+		toLobby: false,
 		view: false,
 		bankroll: 1000,
 		cards: [],
@@ -1109,6 +1111,18 @@ const addRoom = (room, socketId) => {
 	changePlayer.room = room;
 };
 
+const setToLobby = (socketId) => {
+	const changePlayer = gameState.spectators.filter((player) => player.id === socketId)[0];
+	changePlayer.toLobby = false;
+};
+
+const resetTimer = () => {
+	var k = gameState.key + 1;
+	for (let i = 0; i < gameState.players.length; i++) {
+		gameState.key = k;
+	}
+}
+
 const rebuyPlayer = (socketId) => {
 	const clientPlayer = gameState.players.filter((player) => player.id === socketId)[0]
 	clientPlayer.bankroll = 200;
@@ -1140,11 +1154,13 @@ module.exports = {
 	addMessage,
 	addName,
 	addRoom,
+	setToLobby,
 	addSpectators,
 	resetPlayerAction,
 	determineLose,
 	allInMode,
 	resetGame,
 	rebuyPlayer,
-	spectatePlayer
+	spectatePlayer,
+	resetTimer,
 };

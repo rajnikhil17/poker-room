@@ -58,13 +58,14 @@ class Test extends Component {
 				messages: [],
 				winnerMessage: [],
 				started: false,
-				showdown: false
+				showdown: false,
+				key:0,
 			},
 			sound: 'none',
 			joined: false,
 			spectator: true,
 			betAmount: 10,
-			rebuyWindow: false
+			rebuyWindow: false,
 		};
 		this.check = this.check.bind(this);
 		this.fold = this.fold.bind(this);
@@ -101,19 +102,38 @@ class Test extends Component {
 	fold() {
 		const action = { type: 'fold' };
 		socket.emit('action', action);
-		this.setState(key => key + 1);
+		//this.setState(key => key + 1);
+		/*
+		this.setState(prevState => {
+       return {key: prevState.key + 1}
+    });
+		*/
+		socket.emit('resetTimer');
 	}
 
 	check() {
 		const action = { type: 'check' };
 		socket.emit('action', action);
-		this.setState(key => key + 1);
+		//this.setState(key => key + 1);
+		/*
+		this.setState(prevState => {
+			 return {key: prevState.key + 1}
+		});
+		*/
+		socket.emit('resetTimer');
+
 	}
 
 	call() {
 		const action = { type: 'call' };
 		socket.emit('action', action);
-		this.setState(key => key + 1);
+		//this.setState(key => key + 1);
+		/*
+		this.setState(prevState => {
+			 return {key: prevState.key + 1}
+		});
+		*/
+		socket.emit('resetTimer');
 	}
 
 	bet() {
@@ -121,7 +141,13 @@ class Test extends Component {
 		socket.emit('action', action);
 		//clear bet after player action
 		this.setState({ betAmount: 0 });
-		this.setState(key => key + 1);
+		//this.setState(key => key + 1);
+		/*
+		this.setState(prevState => {
+			 return {key: prevState.key + 1}
+		});
+		*/
+		socket.emit('resetTimer');
 	}
 
 	changeBet(amount) {
@@ -131,7 +157,13 @@ class Test extends Component {
 	raise() {
 		const action = { type: 'raise', amount: this.state.betAmount };
 		socket.emit('action', action);
-		this.setState(key => key + 1);
+		//this.setState(key => key + 1);
+		/*
+		this.setState(prevState => {
+			 return {key: prevState.key + 1}
+		});
+		*/
+		socket.emit('resetTimer');
 	}
 
 	messageSubmit(message) {
@@ -173,9 +205,6 @@ class Test extends Component {
 		this.setState({ rebuyWindow: false, joined: false });
 	}
 
-	state= {
-		key:0,
-	}
 
 	render() {
 		const players = this.state.gameState.players;
@@ -223,7 +252,7 @@ class Test extends Component {
 
 					<div style={{marginLeft:'10%'}}>
 					{(this.state.gameState.started)?<CountdownCircleTimer
-						key={this.state.key}
+						key={this.state.gameState.key}
 						isPlaying
 						duration={30}
 						size={100}

@@ -540,6 +540,7 @@ const resetGame = () => {
 	gameState.sidePot = 'pot';
 	gameState.started = false;
 	gameState.players.forEach((player) => {
+		console.log("RESETTING " + player.name);
 		player.cards = [];
 		player.room = '';
 		player.activeBet = 0;

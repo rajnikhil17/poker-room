@@ -198,7 +198,7 @@ io.on('connection', (socket) => {
 
 	socket.on('spectatePlayer', () => {
 		spectatePlayer(socket.id)
-		resetGame()
+		resetGame();
 		io.sockets.emit('gameState', gameState)
 	})
 

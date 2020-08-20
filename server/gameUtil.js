@@ -556,7 +556,7 @@ const resetGame = () => {
 
 const removePlayer = (socketId) => {
 
-	/*
+
 	const removedPlayer = gameState.players.filter((player) => player.id === socketId)[0];
 	let i;
 	for(i = 0; i < gameState.players.length; i++) {
@@ -600,7 +600,7 @@ const removePlayer = (socketId) => {
 			resetGame();
 			gameState.players.forEach((player) => potToPlayer(player));
 		}
-		*/
+		/*
 
 		const oldPlayers = gameState.players.length
 	gameState.players = gameState.players.filter((player) => player.id !== socketId);
@@ -610,7 +610,7 @@ const removePlayer = (socketId) => {
 		gameState.players.forEach((player) => potToPlayer(player));
 	}
 	gameState.spectators = gameState.spectators.filter((player) => player.id !== socketId);
-
+	*/
 };
 
 
